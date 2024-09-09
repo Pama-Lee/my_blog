@@ -10,7 +10,12 @@ const CONFIG = {
     github: "Pama-Lee",
     instagram: "",
   },
-  projects: [],
+  projects: [
+    {
+      name: `XMUM Xplorer`,
+      href: "https://www.xmum.app",
+    },
+  ],
   // blog setting (required)
   blog: {
     title: "Jiake Li's Blog",
