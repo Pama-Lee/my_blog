@@ -19,7 +19,11 @@ const ServiceCard: React.FC = () => {
             rel="noreferrer"
             target="_blank"
           >
-            <AiFillCodeSandboxCircle className="icon" />
+            {
+              (project.icon !== undefined ?
+                <img src={project.icon} alt={project.name} className="icon" /> :
+                <AiFillCodeSandboxCircle className="icon" />
+            }
             <div className="name">{project.name}</div>
           </a>
         ))}

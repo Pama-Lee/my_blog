@@ -14,6 +14,7 @@ const CONFIG = {
     {
       name: `XMUM Xplorer`,
       href: "https://www.xmum.app",
+      icon: "https://www.xmum.app/images/logo.png"
     },
   ],
   // blog setting (required)
