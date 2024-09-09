@@ -25,7 +25,7 @@ const ServiceCard: React.FC = () => {
                 style={{ 
                   width: "1.5rem", 
                   height: "1.5rem",
-                  borderRadius: "10%"
+                  borderRadius: "20%"
                 }} /> : 
                 <AiFillCodeSandboxCircle className="icon" />
               )
