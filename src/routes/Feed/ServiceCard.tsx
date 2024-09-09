@@ -23,6 +23,7 @@ const ServiceCard: React.FC = () => {
               (project.icon !== undefined ?
                 <img src={project.icon} alt={project.name} className="icon" /> :
                 <AiFillCodeSandboxCircle className="icon" />
+              )
             }
             <div className="name">{project.name}</div>
           </a>
