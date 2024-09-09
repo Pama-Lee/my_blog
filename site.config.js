@@ -2,7 +2,7 @@ const CONFIG = {
   // profile setting (required)
   profile: {
     name: "Jiake Li (Pama Lee)",
-    image: "/avatar.svg", // If you want to create your own notion avatar, check out https://notion-avatar.vercel.app
+    image: "/头像.jpeg", // If you want to create your own notion avatar, check out https://notion-avatar.vercel.app
     role: "Full Stack developer",
     bio: "I develop everything using node.",
     email: "pama@pamalee.cn",
@@ -11,10 +11,10 @@ const CONFIG = {
     instagram: "",
   },
   projects: [
-    {
-      name: `morethan-log`,
-      href: "https://github.com/morethanmin/morethan-log",
-    },
+    // {
+    //   name: `morethan-log`,
+    //   href: "https://github.com/morethanmin/morethan-log",
+    // },
   ],
   // blog setting (required)
   blog: {
@@ -58,7 +58,7 @@ const CONFIG = {
     config: {
       repo: process.env.NEXT_PUBLIC_UTTERANCES_REPO || "",
       "issue-term": "og:title",
-      label: "💬 Utterances",
+      label: "💬 Comments"
     },
   },
   cusdis: {
