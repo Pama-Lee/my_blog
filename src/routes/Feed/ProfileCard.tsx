@@ -14,7 +14,9 @@ const ProfileCard: React.FC<Props> = () => {
       </div>
       <div className="content">
         <div className="top">
-          <Image src={CONFIG.profile.image} fill alt="" />
+          <Image src={CONFIG.profile.image} fill alt=""style={{
+            borderRadius: "10%",
+          }} />
         </div>
         <div className="mid">
           <div className=" name">{CONFIG.profile.name}</div>
