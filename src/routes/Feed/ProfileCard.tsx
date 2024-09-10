@@ -21,7 +21,16 @@ const ProfileCard: React.FC<Props> = () => {
         <div className="mid">
           <div className=" name">{CONFIG.profile.name}</div>
           <div className="role">{CONFIG.profile.role}</div>
-          <div className="text-sm mb-2">{CONFIG.profile.bio}</div>
+          {
+          //<div className="text-sm mb-2">{CONFIG.profile.bio}</div>
+          }
+          <div style={{ fontSize: "1rem", lineHeight: "1.25rem" }}>
+            <div style={{ 
+              color: "#528bff",
+               }}>
+              #ENFP #Progammer #Developer #Designer
+            </div>
+          </div>
         </div>
       </div>
     </StyledWrapper>
