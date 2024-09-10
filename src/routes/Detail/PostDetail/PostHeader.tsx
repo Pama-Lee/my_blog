@@ -42,6 +42,18 @@ const PostHeader: React.FC<Props> = ({ data }) => {
               )}
             </div>
           </div>
+          <div className="mid" style={{
+            fontSize: "0.85rem",
+          }}>
+            <div className="date">
+              Last Updated: <span className="date">
+              {formatDate(
+                data?.updatedTime,
+                CONFIG.lang
+              )}
+              </span>
+            </div>
+          </div>
           <div className="mid">
             {data.tags && (
               <div className="tags">
