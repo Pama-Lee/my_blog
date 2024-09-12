@@ -31,6 +31,6 @@ const StyledWrapper = styled.div`
   /** background-color: ${({ theme }) => theme.colors.gray5}; **/
   code[class*="language-mermaid"],
   pre[class*="language-mermaid"] {
-    background-color: rgba(255, 255, 255);
+    background-color: ${({ theme }) => theme.colors.gray1};
   }
 `
