@@ -28,8 +28,9 @@ const StyledWrapper = styled.div`
     padding: 40px 0;
   }
   /** Reference: https://github.com/chriskempson/tomorrow-theme **/
+  /** background-color: ${({ theme }) => theme.colors.gray5}; **/
   code[class*="language-mermaid"],
   pre[class*="language-mermaid"] {
-    background-color: ${({ theme }) => theme.colors.gray5};
+    background-color: rgba(255, 255, 255);
   }
 `
