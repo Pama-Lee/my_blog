@@ -158,8 +158,30 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   overlay.appendChild(content)
   overlay.appendChild(controls)
 
+  const copyright = document.createElement('div')
+  copyright.style.cssText = `
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+  z-index: 9999;
+  font-family: monospace;
+  pointer-events: none;
+  user-select: none;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+`
+  // 放大功能是本站特色
+  copyright.innerHTML = 'This feature is provided by Jiake Li'
+  overlay.appendChild(copyright)
+
   // 深色模式支持
   if (document.documentElement.classList.contains('dark')) {
+    copyright.style.background = 'rgba(255, 255, 255, 0.1)'
     content.style.background = '#1f2937'
     closeButton.style.background = '#374151'
     closeButton.style.color = '#9ca3af'
@@ -181,7 +203,7 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   // 缩放功能
   const updateTransform = () => {
     requestAnimationFrame(() => {
-      svgContainer.style.transform = `scale(${scale}) translate(${translateX/scale}px, ${translateY/scale}px)`
+      svgContainer.style.transform = `scale(${scale}) translate(${translateX / scale}px, ${translateY / scale}px)`
     })
   }
 
@@ -280,6 +302,80 @@ const useMermaidEffect = () => {
     enabled: false,
   })
 
+
+  const addZoomHint = (element: HTMLPreElement) => {
+    // 创建容器使其成为相对定位的上下文
+    const container = document.createElement('div')
+    container.style.cssText = `
+    position: relative;
+    width: 100%;
+  `
+
+    // 创建提示文字
+    const hint = document.createElement('div')
+    hint.style.cssText = `
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 12px;
+    color: #666;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+  `
+    hint.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+    </svg>
+    Click to zoom
+  `
+
+    // 深色模式支持
+    if (document.documentElement.classList.contains('dark')) {
+      hint.style.color = '#9ca3af'
+      hint.style.background = 'rgba(31, 41, 55, 0.9)'
+    }
+
+    // 将原内容包裹在容器中
+    element.parentNode?.insertBefore(container, element)
+    container.appendChild(element)
+    container.appendChild(hint)
+
+    // 添加悬停效果
+    container.addEventListener('mouseenter', () => {
+      hint.style.opacity = '1'
+    })
+    container.addEventListener('mouseleave', () => {
+      hint.style.opacity = '0.6'
+    })
+
+    // 初始状态设置半透明
+    hint.style.opacity = '0.6'
+  }
+
+  const renderMermaidWithHint = async (element: HTMLPreElement, content: string, i: number) => {
+    const svg = await mermaid
+      .render("mermaid" + i, content)
+      .then((res) => res.svg)
+  
+    element.innerHTML = svg
+    element.style.cursor = 'pointer'
+    element.onclick = () => {
+      const overlay = createViewerOverlay(svg)
+      document.body.appendChild(overlay)
+    }
+    
+    addZoomHint(element)
+  }
+
   useEffect(() => {
     if (!isFetched) return
 
@@ -296,38 +392,12 @@ const useMermaidEffect = () => {
           .filter((element): element is HTMLPreElement => element.tagName === "PRE")
           .map(async (element, i) => {
             if (memoMermaid.get(i) !== undefined) {
-              const svg = await mermaid
-                .render("mermaid" + i, memoMermaid.get(i) || "")
-                .then((res) => res.svg)
-
-              element.animate(
-                [
-                  { easing: "ease-in", opacity: 0 },
-                  { easing: "ease-out", opacity: 1 },
-                ],
-                { duration: 300, fill: "both" }
-              )
-
-              element.innerHTML = svg
-              element.style.cursor = 'pointer'
-              element.onclick = () => {
-                const overlay = createViewerOverlay(svg)
-                document.body.appendChild(overlay)
-              }
+              await renderMermaidWithHint(element, memoMermaid.get(i) || "", i)
               return
             }
-
-            const svg = await mermaid
-              .render("mermaid" + i, element.textContent || "")
-              .then((res) => res.svg)
-
+          
+            await renderMermaidWithHint(element, element.textContent || "", i)
             setMemoMermaid(memoMermaid.set(i, element.textContent ?? ""))
-            element.innerHTML = svg
-            element.style.cursor = 'pointer'
-            element.onclick = () => {
-              const overlay = createViewerOverlay(svg)
-              document.body.appendChild(overlay)
-            }
           })
 
         await Promise.all(promises)
