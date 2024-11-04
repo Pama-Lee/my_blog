@@ -43,9 +43,9 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   const content = document.createElement('div')
   content.style.cssText = `
   background: white;
-  padding: 40px;
+  padding: 20px;
   border-radius: 12px;
-  width: 90vw;
+  width: 95vw;
   height: 80vh;
   display: flex;
   justify-content: center;
@@ -55,13 +55,14 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   transform-origin: center;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  touch-action: none; /* 防止移动端下拉刷新 */
 `
 
   // 创建SVG容器
   const svgContainer = document.createElement('div')
   svgContainer.innerHTML = svg
   svgContainer.style.cssText = `
-  width: 100%;
+ width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -69,6 +70,7 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   transform: scale(1);
   user-select: none;
   cursor: move;
+  overflow: visible;
 `
   content.appendChild(svgContainer)
 
@@ -76,12 +78,61 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   if (svgElement) {
     svgElement.style.cssText = `
       max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      pointer-events: none;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    object-fit: contain;
     `
   }
+
+  let touchStartX = 0
+  let touchStartY = 0
+  let lastTouchDistance = 0
+
+  svgContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+      isDragging = true
+      touchStartX = e.touches[0].clientX - translateX
+      touchStartY = e.touches[0].clientY - translateY
+    } else if (e.touches.length === 2) {
+      // 双指缩放
+      lastTouchDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+    }
+    e.preventDefault()
+  }, { passive: false })
+
+  svgContainer.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1 && isDragging) {
+      translateX = e.touches[0].clientX - touchStartX
+      translateY = e.touches[0].clientY - touchStartY
+      updateTransform()
+    } else if (e.touches.length === 2) {
+      // 计算新的触摸点距离
+      const newTouchDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+
+      // 根据距离变化计算缩放
+      if (lastTouchDistance > 0) {
+        const delta = newTouchDistance - lastTouchDistance
+        scale = Math.max(0.5, Math.min(3, scale * (1 + delta * 0.01)))
+        updateTransform()
+      }
+
+      lastTouchDistance = newTouchDistance
+    }
+    e.preventDefault()
+  }, { passive: false })
+
+  svgContainer.addEventListener('touchend', () => {
+    isDragging = false
+    lastTouchDistance = 0
+  })
 
   // 关闭按钮
   const closeButton = document.createElement('button')
@@ -109,31 +160,33 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   const controls = document.createElement('div')
   controls.style.cssText = `
     position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
   `
 
   // 缩放按钮样式
   const buttonStyle = `
     background: #f3f4f6;
-    border: none;
-    border-radius: 4px;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    color: #666;
-    transition: background-color 0.2s;
+  border: none;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #666;
+  transition: background-color 0.2s;
+  touch-action: manipulation;
   `
 
   // 缩小按钮
@@ -161,9 +214,9 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   const copyright = document.createElement('div')
   copyright.style.cssText = `
   position: fixed;
-  bottom: 10px;
+  bottom: max(env(safe-area-inset-bottom, 10px), 10px);
   right: 10px;
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.6);
   text-align: right;
   z-index: 9999;
@@ -203,7 +256,8 @@ const createViewerOverlay = (svg: string): HTMLDivElement => {
   // 缩放功能
   const updateTransform = () => {
     requestAnimationFrame(() => {
-      svgContainer.style.transform = `scale(${scale}) translate(${translateX / scale}px, ${translateY / scale}px)`
+      const transform = `scale(${scale}) translate(${translateX / scale}px, ${translateY / scale}px)`
+      svgContainer.style.transform = transform
     })
   }
 
@@ -365,14 +419,14 @@ const useMermaidEffect = () => {
     const svg = await mermaid
       .render("mermaid" + i, content)
       .then((res) => res.svg)
-  
+
     element.innerHTML = svg
     element.style.cursor = 'pointer'
     element.onclick = () => {
       const overlay = createViewerOverlay(svg)
       document.body.appendChild(overlay)
     }
-    
+
     addZoomHint(element)
   }
 
@@ -395,7 +449,7 @@ const useMermaidEffect = () => {
               await renderMermaidWithHint(element, memoMermaid.get(i) || "", i)
               return
             }
-          
+
             await renderMermaidWithHint(element, element.textContent || "", i)
             setMemoMermaid(memoMermaid.set(i, element.textContent ?? ""))
           })
