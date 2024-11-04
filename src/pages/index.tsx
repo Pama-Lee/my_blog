@@ -31,8 +31,10 @@ const FeedPage: NextPageWithLayout = () => {
 
   return (
     <>
-      <MetaConfig {...meta} />
-      <Feed />
+      <div>
+        <MetaConfig {...meta} />
+        <Feed />
+      </div>
     </>
   )
 }
